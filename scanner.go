@@ -155,6 +155,9 @@ func (s *scanner) scanBraced() (token, string) {
 		} else if ch == '@' {
 			if macro {
 				_, _ = buf.WriteRune(ch)
+			} else if brace == 2 {
+				// @ should be allowed inside double braces
+				_, _ = buf.WriteRune(ch)
 			} else {
 				log.Fatalf("%s: %s", ErrUnexpectedAtsign, buf.String())
 			}
