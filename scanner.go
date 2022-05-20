@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -141,36 +140,23 @@ func (s *scanner) scanBare() (token, string) {
 // scanBraced parses a braced string, like {this}.
 func (s *scanner) scanBraced() (token, string) {
 	var buf bytes.Buffer
-	var macro bool
 	brace := 1
 	for {
 		if ch := s.read(); ch == eof {
 			break
 		} else if ch == '\\' {
 			_, _ = buf.WriteRune(ch)
-			macro = true
 		} else if ch == '{' {
 			_, _ = buf.WriteRune(ch)
 			brace++
 		} else if ch == '}' {
 			brace--
-			macro = false
 			if brace == 0 { // Balances open brace.
 				return tIDENT, buf.String()
 			}
 			_, _ = buf.WriteRune(ch)
-		} else if ch == '@' {
-			if macro {
-				_, _ = buf.WriteRune(ch)
-			} else if brace == 2 {
-				// @ should be allowed inside double braces
-				_, _ = buf.WriteRune(ch)
-			} else {
-				log.Fatalf("%s: %s", ErrUnexpectedAtsign, buf.String())
-			}
 		} else if isWhitespace(ch) {
 			_, _ = buf.WriteRune(ch)
-			macro = false
 		} else {
 			_, _ = buf.WriteRune(ch)
 		}
